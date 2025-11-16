@@ -1,12 +1,13 @@
 package com.video.videoappdemo.home.data.remote.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 typealias VideoResponse = List<VideoItem>
 
 @Serializable
 data class VideoItem(
-    val author: String,
+    /*@SerialName("")*/ val author: String,
     val description: String,
     val duration: String,
     val id: String,

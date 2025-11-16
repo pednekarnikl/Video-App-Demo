@@ -24,6 +24,7 @@ data class VideoPlayer(val videoUrl: String)
 @Composable
 @Preview
 fun App() {
+
     val navController: NavHostController = rememberNavController()
 
     VideoAppDemoTheme {

@@ -15,8 +15,8 @@ class VideoRemoteDataSourceImpl(
 ) : VideoRemoteDataSource {
 
     override suspend fun getVideosApi(): Result<VideoResponse, DataError.Remote> {
-        return safeCall {
-            httpClient.get(BASE_URL)
-        }
+        return safeCall <VideoResponse>(
+            { httpClient.get(BASE_URL) }
+        )
     }
 }
