@@ -1,8 +1,8 @@
 # VideoAppDemo
 
-https://github.com/user-attachments/assets/8d37931a-2159-4138-ad77-0df5ec425561
-
 A modern Android video streaming application built with Jetpack Compose, Clean Architecture, Ktor for networking, and Koin for dependency injection.
+
+https://github.com/user-attachments/assets/8d37931a-2159-4138-ad77-0df5ec425561
 
 ## 🏗️ Project Structure
 
