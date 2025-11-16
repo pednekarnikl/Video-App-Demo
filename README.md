@@ -101,3 +101,82 @@ The app follows Clean Architecture with three main layers:
 - ViewModels for state management
 
 - Navigation between screens
+
+
+## 🔧 Setup Instructions
+
+### Clone the repository
+
+```git clone <repository-url>
+cd videoappdemo
+```
+
+### Configure API Base URL
+Update the base URL in HttpClientFactory or dependency injection module:
+
+```
+// In Module.kt or HttpClientFactory
+baseUrl = "https://your-api-endpoint.com/"
+```
+
+### Build and Run
+
+- Open project in Android Studio
+
+- Build the project (Ctrl+F9)
+
+- Run on device/emulator (Shift+F10)
+
+
+## 🚀 Usage
+
+### Video List Screen(Home)
+
+- Displays a list of available videos
+
+- Shows thumbnails, titles, and descriptions
+
+- Click on any video to start playback
+
+### Video Player Screen
+
+- Full-featured video player using ExoPlayer
+
+- Play/pause controls
+
+- Seek bar for navigation
+
+
+## 🔄 Data Flow
+
+- UI → Calls ViewModel method
+
+- ViewModel → Executes UseCase
+
+- UseCase → Calls Repository
+
+- Repository → Fetches from DataSource
+
+- DataSource → Makes API call via Ktor
+
+- Response → Mapped to Domain → UI State
+
+## 🎨 UI Components
+
+### Compose Screens
+
+- Video list with LazyColumn
+
+- Video card items with Coil images
+
+- ExoPlayer integration for video playback
+
+- Material Design 3 components
+
+### State Management
+
+- Uses StateFlow/State for reactive UI updates
+
+- Loading, Success, Error states handling
+
+- ViewModel scoping for configuration changes
