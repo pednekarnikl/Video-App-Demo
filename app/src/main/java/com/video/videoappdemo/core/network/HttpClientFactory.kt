@@ -6,13 +6,24 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.headers
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object HttpClientFactory {
+
+    /**
+     * HttpClientEngine - the core abstraction that allows Ktor to work with different HTTP clients (OkHttp, Android, iOS, etc.).
+     * ```
+     * suspend fun execute(data: HttpRequestData): HttpResponseData
+     * ```
+     * HttpCache - 1. Caches responses according to HTTP cache headers
+     * 2.Reduces network requests for repeated calls
+     * 3.Improves performance and reduces data usage
+     *
+     * */
+
     fun create(engine: HttpClientEngine): HttpClient {
         return HttpClient(engine) {
             install(ContentNegotiation) {
