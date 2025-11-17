@@ -14,14 +14,14 @@ import kotlinx.serialization.json.Json
 object HttpClientFactory {
 
     /**
-     * HttpClientEngine - the core abstraction that allows Ktor to work with different HTTP clients (OkHttp, Android, iOS, etc.).
+     * HttpClientEngine - the core abstraction that allows Ktor
+     * to work with different HTTP clients (OkHttp, Android, iOS, etc.).
      * ```
      * suspend fun execute(data: HttpRequestData): HttpResponseData
      * ```
      * HttpCache - 1. Caches responses according to HTTP cache headers
      * 2.Reduces network requests for repeated calls
      * 3.Improves performance and reduces data usage
-     *
      * */
 
     fun create(engine: HttpClientEngine): HttpClient {

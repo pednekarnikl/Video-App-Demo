@@ -25,6 +25,12 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(function: (String) -> Unit) {
 
     val coinsListViewModel = koinViewModel<VideoListViewModel>()
+    /**
+     * ```
+     * collectAsStateWithLifecycle - is lifecycle aware Flow - emission is not wasted on background
+     * - emission restarts when app return from background
+     * ```
+     * */
     val state by coinsListViewModel.state.collectAsStateWithLifecycle()
 
     when {
