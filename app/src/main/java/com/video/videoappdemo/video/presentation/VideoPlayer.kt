@@ -4,17 +4,22 @@ import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,8 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -36,6 +43,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import com.video.videoappdemo.R
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -48,6 +56,10 @@ fun VideoPlayer(
     var isLoading by remember { mutableStateOf(true) }
     var hasError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var showCustomControls by remember { mutableStateOf(true) } // Always show controls by default
+    var isPlaying by remember { mutableStateOf(true) }
+    var currentPosition by remember { mutableStateOf(0L) }
+    var duration by remember { mutableStateOf(0L) }
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context)
@@ -63,14 +75,28 @@ fun VideoPlayer(
                             Player.STATE_READY -> {
                                 isLoading = false
                                 hasError = false
+                                duration = this@apply.duration
                             }
 
                             Player.STATE_ENDED -> {
                                 isLoading = false
+                                isPlaying = false
                             }
 
                             Player.STATE_IDLE -> isLoading = false
                         }
+                    }
+
+                    override fun onIsPlayingChanged(playing: Boolean) {
+                        isPlaying = playing
+                    }
+
+                    override fun onPositionDiscontinuity(
+                        oldPosition: Player.PositionInfo,
+                        newPosition: Player.PositionInfo,
+                        reason: Int
+                    ) {
+                        currentPosition = this@apply.currentPosition
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
@@ -100,15 +126,15 @@ fun VideoPlayer(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
         Box(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
+
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             // Video Player with 16:9 aspect ratio
@@ -122,12 +148,14 @@ fun VideoPlayer(
                     factory = { context ->
                         PlayerView(context).apply {
                             player = exoPlayer
-                            useController = true
+                            useController = false // Disable default controller
                             setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                         }
                     },
                     modifier = Modifier.matchParentSize()
                 )
+
+
 
                 // Loading Indicator
                 if (isLoading) {
@@ -172,13 +200,162 @@ fun VideoPlayer(
         }
 
         // Video Title at the Bottom
-        Text(
-            text = videoTitle,
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.White,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
+        Column(modifier = Modifier.align(Alignment.BottomCenter)){
+
+
+            Text(
+                text = videoTitle,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Transparent)
+            ) {
+                /*if (!isLoading && !hasError) {
+                    IconButton(
+                        onClick = {
+                            if (exoPlayer.isPlaying) {
+                                exoPlayer.pause()
+                            } else {
+                                exoPlayer.play()
+                            }
+                        },
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Icon(
+                            painterResource(if (exoPlayer.isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
+                            contentDescription = if (exoPlayer.isPlaying) "Pause" else "Play",
+                            tint = Color.White,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                }*/
+
+                // Bottom Controls
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .background(Color.Black.copy(alpha = 0.7f))
+                        .padding(16.dp)
+                ) {
+                    // Progress Bar
+                    LinearProgressIndicator(
+                        progress = if (duration > 0) (currentPosition.toFloat() / duration.toFloat()) else 0f,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp),
+                        color = Color.Red,
+                        trackColor = Color.White.copy(alpha = 0.3f)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Time and Controls Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = formatTime(currentPosition),
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Row {
+                            IconButton(
+                                onClick = {
+                                    exoPlayer.seekTo(currentPosition - 10000)
+                                },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    painterResource(R.drawable.ic_reply_10),
+                                    contentDescription = "Rewind 10s",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            IconButton(
+                                onClick = {
+                                    if (exoPlayer.isPlaying) {
+                                        exoPlayer.pause()
+                                    } else {
+                                        exoPlayer.play()
+                                    }
+                                },
+                                modifier = Modifier.size(40.dp)
+                            ) {
+                                Icon(
+                                    painterResource(if (exoPlayer.isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
+                                    contentDescription = if (exoPlayer.isPlaying) "Pause" else "Play",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            IconButton(
+                                onClick = {
+                                    exoPlayer.seekTo(currentPosition + 10000) // 10 seconds forward
+                                },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    painterResource(R.drawable.ic_forward_10),
+                                    contentDescription = "Forward 10s",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Text(
+                            text = formatTime(duration),
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+
+
+                    }
+                }
+            }
+        }
     }
+}
+
+// Helper function to format time
+private fun formatTime(milliseconds: Long): String {
+    val totalSeconds = milliseconds / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return String.format("%02d:%02d", minutes, seconds)
+}
+
+// Simple Video Player Screen for navigation
+@Composable
+fun VideoPlayerScreen(
+    videoUrl: String,
+    videoTitle: String,
+    onBackClick: () -> Unit
+) {
+    VideoPlayer(
+        url = videoUrl,
+        videoTitle = videoTitle,
+        onBackClick = onBackClick
+    )
 }
