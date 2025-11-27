@@ -9,11 +9,24 @@ import androidx.compose.ui.graphics.Color
 
 
 @Composable
-fun VideoPlayerScreen(videoUrl: String) {
+fun VideoPlayerScreen(
+    videoUrl : String,
+    videoTitle : String,
+    channelName : String,
+    viewCount : String,
+    uploadDate : String,
+
+) {
 
     Box (contentAlignment = Alignment.Center,
         modifier = Modifier.background(Color.Black)){
-        VideoPlayer(url = videoUrl)
+        VideoPlayer(
+            url = videoUrl,
+            videoTitle = videoTitle,
+
+            onBackClick = {},
+
+        )
 
     }
 }

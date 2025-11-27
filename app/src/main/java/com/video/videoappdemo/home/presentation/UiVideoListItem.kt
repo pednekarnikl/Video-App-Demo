@@ -1,5 +1,8 @@
 package com.video.videoappdemo.home.presentation
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class UiVideoListItem(
     val title: String,
     val description: String,
@@ -10,4 +13,5 @@ data class UiVideoListItem(
     val duration:String,
     val uploadTime:String,
     val views:String,
+
 )

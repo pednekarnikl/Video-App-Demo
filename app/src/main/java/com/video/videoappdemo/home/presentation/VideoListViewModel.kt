@@ -19,14 +19,13 @@ class VideoListViewModel(
     private val _state = MutableStateFlow(VideoState())
     val state = _state
         .onStart {
-            //todo remove this after crash fix
-            delay(1000)
             getAllVideos()
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = VideoState()
         )
+
 
     private suspend fun getAllVideos() {
         when (val videosResponse = getVideoUseCase.execute()) {

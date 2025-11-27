@@ -22,7 +22,7 @@ import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
-fun HomeScreen(function: (String) -> Unit) {
+fun HomeScreen(function: (UiVideoListItem) -> Unit) {
 
     val coinsListViewModel = koinViewModel<VideoListViewModel>()
     /**
@@ -58,17 +58,6 @@ fun HomeScreen(function: (String) -> Unit) {
             modifier = Modifier.fillMaxSize(),
         ) {
 
-
-            item {
-                AutoCarousel(listOf("https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg",
-                    "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-                    "https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg",
-                    "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-                    "https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg",
-                    "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-                    ))
-            }
-
             items(state.videos) {
                 UIVideoItem(
                     it,
@@ -76,7 +65,7 @@ fun HomeScreen(function: (String) -> Unit) {
                         interactionSource = remember { MutableInteractionSource() },
                         indication = LocalIndication.current
                     ) {
-                        function(it.videoUrl)
+                        function(it)
                     }
                 )
             }
