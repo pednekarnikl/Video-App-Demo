@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,7 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +46,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.video.videoappdemo.R
+import kotlinx.coroutines.delay
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -56,10 +59,10 @@ fun VideoPlayer(
     var isLoading by remember { mutableStateOf(true) }
     var hasError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
-    var showCustomControls by remember { mutableStateOf(true) } // Always show controls by default
     var isPlaying by remember { mutableStateOf(true) }
-    var currentPosition by remember { mutableStateOf(0L) }
-    var duration by remember { mutableStateOf(0L) }
+    var currentPosition by remember { mutableLongStateOf(0L) }
+    var duration by remember { mutableLongStateOf(0L) }
+    var playbackStateKey by remember { mutableIntStateOf(0) }
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context)
@@ -81,6 +84,7 @@ fun VideoPlayer(
                             Player.STATE_ENDED -> {
                                 isLoading = false
                                 isPlaying = false
+                                playbackStateKey++ // Force UI update
                             }
 
                             Player.STATE_IDLE -> isLoading = false
@@ -89,6 +93,7 @@ fun VideoPlayer(
 
                     override fun onIsPlayingChanged(playing: Boolean) {
                         isPlaying = playing
+                        playbackStateKey++
                     }
 
                     override fun onPositionDiscontinuity(
@@ -119,6 +124,14 @@ fun VideoPlayer(
             }
     }
 
+    LaunchedEffect(playbackStateKey) {
+        while (true) {
+            // Update current position and force UI refresh
+            currentPosition = exoPlayer.currentPosition
+            delay(100) // Update every 100ms
+        }
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             exoPlayer.stop()
@@ -133,7 +146,6 @@ fun VideoPlayer(
     ) {
         Box(
             modifier = Modifier
-
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
@@ -154,8 +166,6 @@ fun VideoPlayer(
                     },
                     modifier = Modifier.matchParentSize()
                 )
-
-
 
                 // Loading Indicator
                 if (isLoading) {
@@ -199,10 +209,7 @@ fun VideoPlayer(
             }
         }
 
-        // Video Title at the Bottom
-        Column(modifier = Modifier.align(Alignment.BottomCenter)){
-
-
+        Column(modifier = Modifier.align(Alignment.BottomCenter)) {
             Text(
                 text = videoTitle,
                 style = MaterialTheme.typography.titleMedium,
@@ -212,32 +219,11 @@ fun VideoPlayer(
                     .padding(16.dp)
             )
 
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.Transparent)
             ) {
-                /*if (!isLoading && !hasError) {
-                    IconButton(
-                        onClick = {
-                            if (exoPlayer.isPlaying) {
-                                exoPlayer.pause()
-                            } else {
-                                exoPlayer.play()
-                            }
-                        },
-                        modifier = Modifier.align(Alignment.Center)
-                    ) {
-                        Icon(
-                            painterResource(if (exoPlayer.isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
-                            contentDescription = if (exoPlayer.isPlaying) "Pause" else "Play",
-                            tint = Color.White,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-                }*/
-
                 // Bottom Controls
                 Column(
                     modifier = Modifier
@@ -294,11 +280,16 @@ fun VideoPlayer(
                                     } else {
                                         exoPlayer.play()
                                     }
+                                    // Force immediate UI update
+                                    playbackStateKey++
                                 },
                                 modifier = Modifier.size(40.dp)
                             ) {
                                 Icon(
-                                    painterResource(if (exoPlayer.isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
+                                    painterResource(
+                                        if (exoPlayer.isPlaying) R.drawable.ic_pause
+                                        else R.drawable.ic_play
+                                    ),
                                     contentDescription = if (exoPlayer.isPlaying) "Pause" else "Play",
                                     tint = Color.White,
                                     modifier = Modifier.size(24.dp)
@@ -329,33 +320,30 @@ fun VideoPlayer(
                             color = Color.White,
                             fontSize = 12.sp
                         )
-
-
                     }
                 }
             }
         }
+
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 
-// Helper function to format time
 private fun formatTime(milliseconds: Long): String {
     val totalSeconds = milliseconds / 1000
     val minutes = totalSeconds / 60
     val seconds = totalSeconds % 60
     return String.format("%02d:%02d", minutes, seconds)
-}
-
-// Simple Video Player Screen for navigation
-@Composable
-fun VideoPlayerScreen(
-    videoUrl: String,
-    videoTitle: String,
-    onBackClick: () -> Unit
-) {
-    VideoPlayer(
-        url = videoUrl,
-        videoTitle = videoTitle,
-        onBackClick = onBackClick
-    )
 }
