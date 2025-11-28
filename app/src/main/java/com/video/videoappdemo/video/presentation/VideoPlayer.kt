@@ -1,7 +1,10 @@
 package com.video.videoappdemo.video.presentation
 
 import androidx.annotation.OptIn
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -63,6 +67,14 @@ fun VideoPlayer(
     var currentPosition by remember { mutableLongStateOf(0L) }
     var duration by remember { mutableLongStateOf(0L) }
     var playbackStateKey by remember { mutableIntStateOf(0) }
+
+    var showControls by remember { mutableStateOf(true) }
+
+
+    LaunchedEffect(showControls) {
+        delay(5000)
+        showControls = false
+    }
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context)
@@ -132,6 +144,8 @@ fun VideoPlayer(
         }
     }
 
+
+
     DisposableEffect(Unit) {
         onDispose {
             exoPlayer.stop()
@@ -151,10 +165,15 @@ fun VideoPlayer(
         ) {
             // Video Player with 16:9 aspect ratio
             Box(
-                modifier = Modifier
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = LocalIndication.current
+                )  { showControls = true }
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)
                     .background(Color.Black)
+                    .align(Alignment.Center)
+                    .offset(y = (-40).dp)
             ) {
                 AndroidView(
                     factory = { context ->
@@ -209,6 +228,7 @@ fun VideoPlayer(
             }
         }
 
+        if (showControls)
         Column(modifier = Modifier.align(Alignment.BottomCenter)) {
             Text(
                 text = videoTitle,
@@ -216,7 +236,7 @@ fun VideoPlayer(
                 color = Color.White,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
             )
 
             Box(
@@ -325,19 +345,7 @@ fun VideoPlayer(
             }
         }
 
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
-        }
+
     }
 }
 
