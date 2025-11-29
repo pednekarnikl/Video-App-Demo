@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Video App Demo"
 include(":app")
- 
+include(":baselineprofile")

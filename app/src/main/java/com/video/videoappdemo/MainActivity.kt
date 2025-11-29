@@ -13,6 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import com.video.videoappdemo.core.navigation.App
 import com.video.videoappdemo.home.presentation.HomeScreen
@@ -38,7 +40,9 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { innerPadding ->
                     Box(
-                        modifier = Modifier
+                        modifier = Modifier.semantics {
+                            testTagsAsResourceId = true
+                        }
                             .padding(innerPadding)
                             .fillMaxSize()
                     ) {

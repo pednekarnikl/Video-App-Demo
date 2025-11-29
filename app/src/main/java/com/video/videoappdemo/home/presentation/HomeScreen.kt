@@ -15,11 +15,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.video.videoappdemo.home.presentation.components.AutoCarousel
 import org.koin.androidx.compose.koinViewModel
 
+
+object TestTags {
+    const val VIDEO_LIST = "video_list"
+    const val VIDEO_ITEM = "video_item"
+    const val CIRCULAR_LOADER = "circular_loader"
+    const val ERROR_MESSAGE = "error_message"
+}
 
 @Composable
 fun HomeScreen(function: (UiVideoListItem) -> Unit) {
@@ -36,7 +43,7 @@ fun HomeScreen(function: (UiVideoListItem) -> Unit) {
     when {
         state.error != null -> {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().testTag(TestTags.ERROR_MESSAGE),
                 contentAlignment = Alignment.Center
             ) {
                 Text((state.error) ?: "")
@@ -46,7 +53,7 @@ fun HomeScreen(function: (UiVideoListItem) -> Unit) {
         state.videos.isEmpty() -> {
 
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize() .testTag(TestTags.CIRCULAR_LOADER),
                 contentAlignment = Alignment.Center
             ) {
                 CircularLoader()
@@ -55,13 +62,13 @@ fun HomeScreen(function: (UiVideoListItem) -> Unit) {
 
         else -> LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.testTag(TestTags.VIDEO_LIST).fillMaxSize(),
         ) {
 
             items(state.videos) {
                 UIVideoItem(
                     it,
-                    modifier = Modifier.clickable(
+                    modifier = Modifier.testTag(TestTags.VIDEO_ITEM).clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = LocalIndication.current
                     ) {
